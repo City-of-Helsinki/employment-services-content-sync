@@ -6,7 +6,7 @@ async function fetchDrupalEvents() {
   if (!drupalSsrUrl) {
     throw "Set DRUPAL_SSR_URL";
   }
-  const eventsdrupalSsrUrl = drupalSsrUrl + "/fi/apijson/node/event?include=field_page_content";
+  const eventsdrupalSsrUrl = drupalSsrUrl + '/jsonapi/node/event';
   const drupalEvents = await getDrupalEvents(eventsdrupalSsrUrl);
 
   if (!drupalEvents) {
@@ -58,11 +58,11 @@ export const syncElasticSearchEvents = async () => {
   await createIndex('events', properties);
 
   try {
-    const dataset = await fetchDrupalEvents();
-    const body = dataset.flatMap((doc: any) => [{ index: { _index: "events", _id : doc.id } }, doc]);
-    const { body: bulkResponse } = await client.bulk({ refresh: true, body });
-    const { body: count } = await client.count({ index: "events" });
-    console.log("added:", count.count);
+    let dataset = await fetchDrupalEvents();
+    const operations = dataset.flatMap((doc: any) => [{ index: { _index: "events", _id : doc.id } }, doc]);
+    await client.bulk({ refresh: true, operations });
+    const { count } = await client.count({ index: "events" });
+    console.log("added:", count);
   } catch (err) {
     console.log("ERROR when adding events to index: ", err);
   }

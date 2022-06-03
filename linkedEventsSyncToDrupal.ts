@@ -6,7 +6,7 @@ import { getDrupalEvents, allowedTags } from "./helpers";
 require("dotenv").config();
 
 const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
-const drupalEventUrl = process.env.DRUPAL_SSR_URL + "/apijson/node/event";
+const drupalEventUrl = process.env.DRUPAL_SSR_URL + "/jsonapi/node/event";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -94,7 +94,6 @@ interface DrupalEventAttributes {
   field_publisher: string;
   field_short_description: string;
   field_text: string;
-  field_title: string;
   field_start_time: string;
   field_end_time: string;
   field_last_modified_time: string;
@@ -225,7 +224,6 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
     field_text: linkedEvent.description.fi,
-    field_title: linkedEvent.name.fi,
     field_start_time: linkedEvent.start_time,
     field_end_time: linkedEvent.end_time,
     field_last_modified_time: linkedEvent.last_modified_time,
