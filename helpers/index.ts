@@ -12,7 +12,7 @@ export const capitalize = (s: string) => {
 }
 
 export const getPagePath = (drupalSsrUrl: string, page: string, includes: string, filter = "") => {
-  const api = "apijson";
+  const api = 'jsonapi';
   let rest = "/" + api + page + includes;
   if (filter) {
     rest += filter;
@@ -129,8 +129,8 @@ export const findNodeData = (data: any, files: any, media: any) => {
   return parsedData
 }
 
-export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/file/file");
-export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/media/image");
+export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/jsonapi/file/file");
+export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/jsonapi/media/image");
 
 export const deleteIndex = async (name: string) => {
   const client = getClient();
@@ -159,19 +159,24 @@ export const createIndex = async (indexName: string, properties: any) => {
   try {
     await client.indices.create(newIndex(indexName), { ignore: [400] });
   } catch (err) {
-    console.log(`WARNING when deleting ${indexName} index: ${err}`);
+    console.log(`WARNING when creating ${indexName} index: ${err}`);
     return;
   }
 
 }
 
-export const getDrupalEvents = async (url: string): Promise<any> => {  
-  const response = await axios.get(url);
-  const data = response.data.data;
-
-  if (response.data.links.next) {
-    return data.concat(await getDrupalEvents(response.data.links.next.href));
-  } else {
-    return data;
+export const getDrupalEvents = async (url: string): Promise<any> => {
+  try {
+    const response = await axios.get(url);
+    const data = response.data.data;
+  
+    if (response.data.links.next) {
+      return data.concat(await getDrupalEvents(response.data.links.next.href));
+    } else {
+      return data;
+    }
+  } catch (err) {
+    console.log(`WARNING getDrupalEvents ${err}`);
+    return;
   }
 }
