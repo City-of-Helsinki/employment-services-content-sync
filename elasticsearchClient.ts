@@ -11,10 +11,10 @@ export const getClient = (): Client => {
   return new Client({ 
     node: url,
     auth: {
-      username: "elastic",
-      password: process.env.elasticsearch_password || "changeme",
+      username: 'elastic',
+      password: process.env.elasticsearch_password || 'changeme',
     },
-    ssl: {
+    tls: {
       ca: process.env.elasticsearch_certificate,
       rejectUnauthorized: false,
     }

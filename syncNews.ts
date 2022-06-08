@@ -60,11 +60,11 @@ export const syncElasticSearchNews = async () => {
     });
   
     const body = dataset.flatMap((doc: any) => doc);
-    const { body: bulkResponse } = await client.bulk({ refresh: true, body });
-    const [{ body: fiBody }, { body: svBody }, { body: enBody }] = await Promise.all([client.count({ index: "news-fi" }), client.count({ index: "news-sv" }), client.count({ index: "news-en" })]);
-    console.log("news-fi added:", fiBody.count);
-    console.log("news-sv added:", svBody.count);
-    console.log("news-en added:", enBody.count);
+    await client.bulk({ refresh: true, body });
+    const [{ count: fiCount }, { count: svCount }, { count: enCount }] = await Promise.all([client.count({ index: "news-fi" }), client.count({ index: "news-sv" }), client.count({ index: "news-en" })]);
+    console.log("news-fi added:", fiCount);
+    console.log("news-sv added:", svCount);
+    console.log("news-en added:", enCount);
   } catch (err) {
     console.warn("WARNING when adding news to index: " + err);
   }
