@@ -206,6 +206,7 @@ const syncLinkedEventsToDrupal = async () => {
 };
 const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem) => {
   const tags = await getEventKeywords(linkedEvent);
+  const finalTags = tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'maahan_muuttaneet' : tag);
   const info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : '';
 
   const externalLinks = linkedEvent.external_links && linkedEvent.external_links.map((extLink: any) => {
@@ -239,7 +240,7 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     path: {
       alias: '/' + urlSlug(linkedEvent.name.fi),
     },
-    field_tags: tags,
+    field_tags: finalTags,
   };
 
   return drupalEvent;
