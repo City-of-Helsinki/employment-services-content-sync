@@ -97,8 +97,8 @@ interface DrupalEventAttributes {
     format: string;
     value: string;
   }
-  field_start_time: string;
-  field_end_time: string;
+  field_start_time: number;
+  field_end_time: number;
   field_last_modified_time: string;
   field_info_url: string;
   field_location_extra_info: string;
@@ -231,8 +231,8 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
       format: 'basic_html',
       value: linkedEvent.description.fi
     },
-    field_start_time: linkedEvent.start_time,
-    field_end_time: linkedEvent.end_time,
+    field_start_time: Date.parse(linkedEvent.start_time),
+    field_end_time: Date.parse(linkedEvent.end_time),
     field_last_modified_time: linkedEvent.last_modified_time,
     field_info_url: info_url.length > 255 ? '' : info_url,
     field_location_extra_info: linkedEvent.location_extra_info ? linkedEvent.location_extra_info.fi : '',
