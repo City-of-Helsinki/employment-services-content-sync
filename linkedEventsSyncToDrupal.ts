@@ -5,7 +5,7 @@ import { getDrupalEvents, allowedTags } from "./helpers";
 
 require("dotenv").config();
 
-const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
+const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
 const drupalEventUrl = process.env.DRUPAL_SSR_URL + '/jsonapi/node/event';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -166,7 +166,9 @@ const syncLinkedEventsToDrupal = async () => {
         if (eventModified) {
           modified = true;
           await deleteDrupalEvent(currentDrupalEvent!.id);
+          await sleep(5000);
           await addEventToDrupal(linkedEvent);
+          await sleep(5000);
           console.log(linkedEvent.id, "- modified and updated");
         } else if (dateNow > linkedEventTime) {
           modified = true;
@@ -182,6 +184,7 @@ const syncLinkedEventsToDrupal = async () => {
         if (dateNow <= linkedEventTime) {
           modified = true;
           await addEventToDrupal(linkedEvent);
+          await sleep(5000);
         } else {
           console.log(linkedEvent.id, "- ignore: event passed");
         }

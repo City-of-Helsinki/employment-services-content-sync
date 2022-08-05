@@ -1,6 +1,5 @@
 import axios from "axios";
 import { find } from 'lodash';
-import { getClient } from "../elasticsearchClient";
 
 export const allowedTags = ["maahanmuuttajat", "nuoret", "info", "koulutus", "messut", "neuvonta", "rekrytointi", "työpajat", "digitaidot", "etätapahtuma", "palkkatuki", "työnhaku"];
 
@@ -131,39 +130,6 @@ export const findNodeData = (data: any, files: any, media: any) => {
 
 export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/jsonapi/file/file");
 export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/jsonapi/media/image");
-
-export const deleteIndex = async (name: string) => {
-  const client = getClient();
-
-  try {
-    await client.indices.delete({ index: name });
-  } catch (err) {
-    console.warn(`WARNING when deleting ${name} index: ${err}`);
-  }
-}
-
-export const createIndex = async (indexName: string, properties: any) => {
-  const client = getClient();
-
-  const newIndex = (name: string) => {
-    return {
-      index: name,
-      body: {
-        mappings: {
-          properties
-        },
-      },
-    }
-  };
-
-  try {
-    await client.indices.create(newIndex(indexName), { ignore: [400] });
-  } catch (err) {
-    console.log(`WARNING when creating ${indexName} index: ${err}`);
-    return;
-  }
-
-}
 
 export const getDrupalEvents = async (url: string): Promise<any> => {
   try {
