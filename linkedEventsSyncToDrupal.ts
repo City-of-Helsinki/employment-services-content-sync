@@ -5,7 +5,7 @@ import { getDrupalEvents, allowedTags } from "./helpers";
 
 require("dotenv").config();
 
-const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
+const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
 const drupalEventUrl = process.env.DRUPAL_SSR_URL + '/jsonapi/node/event';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -97,8 +97,8 @@ interface DrupalEventAttributes {
     format: string;
     value: string;
   }
-  field_start_time: string;
-  field_end_time: string;
+  field_start_time: number;
+  field_end_time: number;
   field_last_modified_time: string;
   field_info_url: string;
   field_location_extra_info: string;
@@ -166,7 +166,9 @@ const syncLinkedEventsToDrupal = async () => {
         if (eventModified) {
           modified = true;
           await deleteDrupalEvent(currentDrupalEvent!.id);
+          await sleep(5000);
           await addEventToDrupal(linkedEvent);
+          await sleep(5000);
           console.log(linkedEvent.id, "- modified and updated");
         } else if (dateNow > linkedEventTime) {
           modified = true;
@@ -182,6 +184,7 @@ const syncLinkedEventsToDrupal = async () => {
         if (dateNow <= linkedEventTime) {
           modified = true;
           await addEventToDrupal(linkedEvent);
+          await sleep(5000);
         } else {
           console.log(linkedEvent.id, "- ignore: event passed");
         }
@@ -206,6 +209,7 @@ const syncLinkedEventsToDrupal = async () => {
 };
 const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem) => {
   const tags = await getEventKeywords(linkedEvent);
+  const finalTags = tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'maahan_muuttaneet' : tag);
   const info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : '';
 
   const externalLinks = linkedEvent.external_links && linkedEvent.external_links.map((extLink: any) => {
@@ -230,8 +234,8 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
       format: 'basic_html',
       value: linkedEvent.description.fi
     },
-    field_start_time: linkedEvent.start_time,
-    field_end_time: linkedEvent.end_time,
+    field_start_time: Date.parse(linkedEvent.start_time),
+    field_end_time: Date.parse(linkedEvent.end_time),
     field_last_modified_time: linkedEvent.last_modified_time,
     field_info_url: info_url.length > 255 ? '' : info_url,
     field_location_extra_info: linkedEvent.location_extra_info ? linkedEvent.location_extra_info.fi : '',
@@ -239,7 +243,7 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     path: {
       alias: '/' + urlSlug(linkedEvent.name.fi),
     },
-    field_tags: tags,
+    field_tags: finalTags,
   };
 
   return drupalEvent;
