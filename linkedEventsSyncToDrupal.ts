@@ -16,7 +16,7 @@ interface LinkedEventsItem {
   };
   id: string;
   location: {
-    "@id": string;
+    id: string;
     name:  {
       fi: string;
     };
@@ -64,6 +64,7 @@ interface LinkedEventsItem {
 }
 
 interface LinkedEventsLocation {
+  id: string;
   name: {
     fi: string;
     sv: string;
@@ -91,6 +92,7 @@ interface DrupalEventAttributes {
   field_image_alt: string;
   field_in_language: string;
   field_location: string;
+  field_location_id: number;
   field_publisher: string;
   field_short_description: string;
   field_text: {
@@ -219,8 +221,9 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     }
     return drupalLink;
   });
+console.log('Location ID: ', linkedEvent.location.id.replace(/\D/g, ""))
 
-  const drupalEvent: DrupalEventAttributes = {
+  const drupalEvent: { field_id: string; field_info_url: string; field_location: string; field_end_time: number; field_image_alt: string; field_location_id: number; title: string; field_image_url: string; field_start_time: number; field_image_name: string; field_short_description: string; path: { alias: string }; field_text: { format: string; value: string }; field_last_modified_time: string; field_publisher: string; field_location_extra_info: string; field_external_links: { title: any; uri: string }[]; field_in_language: string; field_tags: string[] } = {
     title: linkedEvent.name.fi,
     field_id: linkedEvent['id'],
     field_image_name: linkedEvent.images.length > 0 ? linkedEvent.images[0].name : '',
@@ -228,6 +231,7 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     field_image_alt: linkedEvent.images.length > 0 ? linkedEvent.images[0].alt_text : '',
     field_in_language: linkedEvent.in_language['@id'],
     field_location: linkedEvent.location.name.fi,
+    field_location_id: parseInt(linkedEvent.location.id.replace(/\D/g, "")),
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
     field_text: {
