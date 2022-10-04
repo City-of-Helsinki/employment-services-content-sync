@@ -16,7 +16,7 @@ interface LinkedEventsItem {
   };
   id: string;
   location: {
-    "@id": string;
+    id: string;
     name:  {
       fi: string;
     };
@@ -64,6 +64,7 @@ interface LinkedEventsItem {
 }
 
 interface LinkedEventsLocation {
+  id: string;
   name: {
     fi: string;
     sv: string;
@@ -91,6 +92,7 @@ interface DrupalEventAttributes {
   field_image_alt: string;
   field_in_language: string;
   field_location: string;
+  field_location_id: number;
   field_publisher: string;
   field_short_description: string;
   field_text: {
@@ -228,6 +230,7 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     field_image_alt: linkedEvent.images.length > 0 ? linkedEvent.images[0].alt_text : '',
     field_in_language: linkedEvent.in_language['@id'],
     field_location: linkedEvent.location.name.fi,
+    field_location_id: parseInt(linkedEvent.location.id.replace(/\D/g, "")),
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
     field_text: {
