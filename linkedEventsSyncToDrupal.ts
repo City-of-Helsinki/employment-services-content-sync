@@ -20,6 +20,9 @@ interface LinkedEventsItem {
     name:  {
       fi: string;
     };
+    street_address: null | {
+      fi: string;
+    }
   };
   keywords: {
     "@id": string;
@@ -112,6 +115,7 @@ interface DrupalEventAttributes {
     alias: string;
   };
   field_tags: Array<string>;
+  field_street_address: string;
 }
 
 const userName = process.env.DRUPAL_API_LINKEDEVENTS_USER;
@@ -247,6 +251,7 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
       alias: '/' + urlSlug(linkedEvent.name.fi),
     },
     field_tags: finalTags,
+    field_street_address: linkedEvent.location.street_address !== null ? linkedEvent.location.street_address.fi : '',
   };
 
   return drupalEvent;
