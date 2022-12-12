@@ -15,7 +15,7 @@ const syncEventsToDrupal = async () => {
 
 syncEventsToDrupal();
 
-// Sync events every 20 minutes
+// Sync events every 15 minutes
 cron.schedule("*/15 * * * *", async () => {
   syncEventsToDrupal();
 });
