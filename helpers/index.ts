@@ -1,6 +1,5 @@
 import axios from "axios";
 import { find } from 'lodash';
-import { getClient } from "../elasticsearchClient";
 
 export const allowedTags = ["maahanmuuttajat", "nuoret", "info", "koulutus", "messut", "neuvonta", "rekrytointi", "työpajat", "digitaidot", "etätapahtuma", "palkkatuki", "työnhaku"];
 
@@ -12,7 +11,7 @@ export const capitalize = (s: string) => {
 }
 
 export const getPagePath = (drupalSsrUrl: string, page: string, includes: string, filter = "") => {
-  const api = "apijson";
+  const api = 'jsonapi';
   let rest = "/" + api + page + includes;
   if (filter) {
     rest += filter;
@@ -129,49 +128,21 @@ export const findNodeData = (data: any, files: any, media: any) => {
   return parsedData
 }
 
-export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/file/file");
-export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/media/image");
+export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/jsonapi/file/file");
+export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/jsonapi/media/image");
 
-export const deleteIndex = async (name: string) => {
-  const client = getClient();
-
+export const getDrupalEvents = async (url: string): Promise<any> => {
   try {
-    await client.indices.delete({ index: name });
-  } catch (err) {
-    console.warn(`WARNING when deleting ${name} index: ${err}`);
-  }
-}
-
-export const createIndex = async (indexName: string, properties: any) => {
-  const client = getClient();
-
-  const newIndex = (name: string) => {
-    return {
-      index: name,
-      body: {
-        mappings: {
-          properties
-        },
-      },
+    const response = await axios.get(url);
+    const data = response.data.data;
+  
+    if (response.data.links.next) {
+      return data.concat(await getDrupalEvents(response.data.links.next.href));
+    } else {
+      return data;
     }
-  };
-
-  try {
-    await client.indices.create(newIndex(indexName), { ignore: [400] });
   } catch (err) {
-    console.log(`WARNING when deleting ${indexName} index: ${err}`);
+    console.log(`WARNING getDrupalEvents ${err}`);
     return;
-  }
-
-}
-
-export const getDrupalEvents = async (url: string): Promise<any> => {  
-  const response = await axios.get(url);
-  const data = response.data.data;
-
-  if (response.data.links.next) {
-    return data.concat(await getDrupalEvents(response.data.links.next.href));
-  } else {
-    return data;
   }
 }

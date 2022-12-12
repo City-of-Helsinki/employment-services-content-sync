@@ -5,8 +5,8 @@ import { getDrupalEvents, allowedTags } from "./helpers";
 
 require("dotenv").config();
 
-const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
-const drupalEventUrl = process.env.DRUPAL_SSR_URL + "/apijson/node/event";
+const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
+const drupalEventUrl = process.env.DRUPAL_SSR_URL + '/jsonapi/node/event';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -16,10 +16,13 @@ interface LinkedEventsItem {
   };
   id: string;
   location: {
-    "@id": string;
+    id: string;
     name:  {
       fi: string;
     };
+    street_address: null | {
+      fi: string;
+    }
   };
   keywords: {
     "@id": string;
@@ -64,6 +67,7 @@ interface LinkedEventsItem {
 }
 
 interface LinkedEventsLocation {
+  id: string;
   name: {
     fi: string;
     sv: string;
@@ -91,12 +95,15 @@ interface DrupalEventAttributes {
   field_image_alt: string;
   field_in_language: string;
   field_location: string;
+  field_location_id: number;
   field_publisher: string;
   field_short_description: string;
-  field_text: string;
-  field_title: string;
-  field_start_time: string;
-  field_end_time: string;
+  field_text: {
+    format: string;
+    value: string;
+  }
+  field_start_time: number;
+  field_end_time: number;
   field_last_modified_time: string;
   field_info_url: string;
   field_location_extra_info: string;
@@ -108,6 +115,7 @@ interface DrupalEventAttributes {
     alias: string;
   };
   field_tags: Array<string>;
+  field_street_address: string;
 }
 
 const userName = process.env.DRUPAL_API_LINKEDEVENTS_USER;
@@ -164,7 +172,9 @@ const syncLinkedEventsToDrupal = async () => {
         if (eventModified) {
           modified = true;
           await deleteDrupalEvent(currentDrupalEvent!.id);
+          await sleep(5000);
           await addEventToDrupal(linkedEvent);
+          await sleep(5000);
           console.log(linkedEvent.id, "- modified and updated");
         } else if (dateNow > linkedEventTime) {
           modified = true;
@@ -180,6 +190,7 @@ const syncLinkedEventsToDrupal = async () => {
         if (dateNow <= linkedEventTime) {
           modified = true;
           await addEventToDrupal(linkedEvent);
+          await sleep(5000);
         } else {
           console.log(linkedEvent.id, "- ignore: event passed");
         }
@@ -204,6 +215,7 @@ const syncLinkedEventsToDrupal = async () => {
 };
 const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem) => {
   const tags = await getEventKeywords(linkedEvent);
+  const finalTags = tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'maahan_muuttaneet' : tag);
   const info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : '';
 
   const externalLinks = linkedEvent.external_links && linkedEvent.external_links.map((extLink: any) => {
@@ -222,12 +234,15 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     field_image_alt: linkedEvent.images.length > 0 ? linkedEvent.images[0].alt_text : '',
     field_in_language: linkedEvent.in_language['@id'],
     field_location: linkedEvent.location.name.fi,
+    field_location_id: parseInt(linkedEvent.location.id.replace(/\D/g, "")),
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
-    field_text: linkedEvent.description.fi,
-    field_title: linkedEvent.name.fi,
-    field_start_time: linkedEvent.start_time,
-    field_end_time: linkedEvent.end_time,
+    field_text: {
+      format: 'basic_html',
+      value: linkedEvent.description.fi
+    },
+    field_start_time: Date.parse(linkedEvent.start_time),
+    field_end_time: Date.parse(linkedEvent.end_time),
     field_last_modified_time: linkedEvent.last_modified_time,
     field_info_url: info_url.length > 255 ? '' : info_url,
     field_location_extra_info: linkedEvent.location_extra_info ? linkedEvent.location_extra_info.fi : '',
@@ -235,7 +250,8 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     path: {
       alias: '/' + urlSlug(linkedEvent.name.fi),
     },
-    field_tags: tags,
+    field_tags: finalTags,
+    field_street_address: linkedEvent.location.street_address !== null ? linkedEvent.location.street_address.fi : '',
   };
 
   return drupalEvent;
