@@ -50,6 +50,7 @@ interface LinkedEventsItem {
   start_time: string;
   end_time: string;
   last_modified_time: string;
+  event_status: string;
   info_url: {
     fi: string;
   };
@@ -105,6 +106,7 @@ interface DrupalEventAttributes {
   field_start_time: number;
   field_end_time: number;
   field_last_modified_time: string;
+  field_event_status: string;
   field_info_url: string;
   field_location_extra_info: string;
   field_external_links: {
@@ -244,6 +246,7 @@ const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem
     field_start_time: Date.parse(linkedEvent.start_time),
     field_end_time: Date.parse(linkedEvent.end_time),
     field_last_modified_time: linkedEvent.last_modified_time,
+    field_event_status: linkedEvent.event_status,
     field_info_url: info_url.length > 255 ? '' : info_url,
     field_location_extra_info: linkedEvent.location_extra_info ? linkedEvent.location_extra_info.fi : '',
     field_external_links: externalLinks,
