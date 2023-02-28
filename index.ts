@@ -13,9 +13,10 @@ const syncEventsToDrupal = async () => {
   await syncLinkedEventsToDrupal();
 };
 
-syncEventsToDrupal();
+/* Sync stopped due to Drupal sync module implementation */
+// syncEventsToDrupal();
 
 // Sync events every 15 minutes
-cron.schedule("*/15 * * * *", async () => {
-  syncEventsToDrupal();
-});
+// cron.schedule("*/15 * * * *", async () => {
+//  syncEventsToDrupal();
+// });
