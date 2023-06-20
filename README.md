@@ -1,3 +1,5 @@
+# NOTE: This application is no longer in use. Everything in this repository is currently deprecated.
+
 # employment-services-content-sync
 
 Syncs events from Linked Events to Drupal
